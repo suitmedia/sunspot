@@ -16,13 +16,10 @@ module Sunspot
         :wt => :ruby
       }
 
-      data = nil
-
       @fields.each do |f|   
         if f.name.to_s.include?("_attachment")
-          #data = open(f.value).read
-          data = f.value
           params['fmap.content'] = f.name
+          params['stream.file'] = f.value
         else
           param_name = "literal.#{f.name.to_s}"
           params[param_name] = [] unless params.has_key?(param_name)
@@ -34,8 +31,7 @@ module Sunspot
       end
 
       solr_message = params
-      #connection.send('update/extract', solr_message, data)
-      puts `curl "#{Sunspot.config.solr.url}/update/extract?#{solr_message.to_query.gsub(/\[\]/, "")}" -F "stream.file=#{data}"`
+      connection.send('update/extract', solr_message)
     end
   end
 end
